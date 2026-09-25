@@ -132,14 +132,20 @@ def create_archive(
     output: Path,
     on_progress: Optional[ProgressCallback] = None,
     compression_level: int = 1,
+    password: Optional[str] = None,
 ) -> None:
-    """アーカイブを作成する"""
+    """アーカイブを作成する。
+
+    `password` が指定された ZIP / 7z は ArchiveService の暗号化作成経路へ
+    そのまま渡す。空文字は暗号化なしとして扱う。
+    """
     from kaito.domain.models import CompressionOptions
 
     options = CompressionOptions(
         sources=sources,
         output_path=output,
         compression_level=compression_level,
+        password=password or None,
         on_progress=on_progress,
     )
     _get_service().create(options)

@@ -317,7 +317,7 @@ def main() -> None:
         )
         raise SystemExit(2)
 
-    from kaito.gui.unzip_app import main as gui_main
+    from kaito.gui.secure_unzip_app import main as gui_main
 
     gui_main()
 
