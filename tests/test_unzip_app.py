@@ -7,6 +7,7 @@ from contextlib import ExitStack
 from datetime import datetime
 import sys
 import zipfile
+from types import SimpleNamespace
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
