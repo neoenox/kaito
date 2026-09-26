@@ -1460,11 +1460,13 @@ def _get_exe_path() -> Path:
     """kaito実行ファイルのパスを返す"""
     if getattr(sys, "frozen", False):  # PyInstallerビルド
         return Path(sys.executable)
-    # 開発環境: dist/kaito.exe を返す
-    dev_exe = Path(sys.executable).parent.parent / "dist" / "kaito.exe"
+    # 開発環境: リポジトリ直下の dist/kaito.exe を使う。
+    dev_exe = Path(__file__).parents[3] / "dist" / "kaito.exe"
     if dev_exe.exists():
         return dev_exe
-    return Path(sys.executable)
+    raise FileNotFoundError(
+        "dist/kaito.exe が見つかりません。コンテキストメニュー登録前に kaito.exe をビルドしてください。"
+    )
 
 
 def install_context_menu() -> None:
