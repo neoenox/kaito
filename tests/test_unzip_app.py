@@ -1489,7 +1489,6 @@ class TestCompressMethods:
 class TestContextMenu:
     """install_context_menu / uninstall_context_menu のテスト"""
 
-
     def test_get_exe_path_uses_repo_dist_and_never_python_fallback(self) -> None:
         fake_sys = SimpleNamespace(
             frozen=False, executable="C:/repo/.venv/Scripts/python.exe"
