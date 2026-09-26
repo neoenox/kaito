@@ -7,6 +7,7 @@ from contextlib import ExitStack
 from datetime import datetime
 import sys
 import zipfile
+from types import SimpleNamespace
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -1487,6 +1488,27 @@ class TestCompressMethods:
 
 class TestContextMenu:
     """install_context_menu / uninstall_context_menu のテスト"""
+
+    def test_get_exe_path_uses_repo_dist_and_never_python_fallback(self) -> None:
+        fake_sys = SimpleNamespace(
+            frozen=False, executable="C:/repo/.venv/Scripts/python.exe"
+        )
+        with (
+            patch("kaito.gui.unzip_app.sys", fake_sys),
+            patch("kaito.gui.unzip_app.__file__", "C:/repo/src/kaito/gui/unzip_app.py"),
+            patch("kaito.gui.unzip_app.Path.exists", return_value=True),
+        ):
+            from kaito.gui.unzip_app import _get_exe_path
+
+            assert _get_exe_path() == Path("C:/repo/dist/kaito.exe")
+
+        with (
+            patch("kaito.gui.unzip_app.sys", fake_sys),
+            patch("kaito.gui.unzip_app.__file__", "C:/repo/src/kaito/gui/unzip_app.py"),
+            patch("kaito.gui.unzip_app.Path.exists", return_value=False),
+            pytest.raises(FileNotFoundError, match="dist/kaito.exe"),
+        ):
+            _get_exe_path()
 
     @pytest.mark.skipif(sys.platform != "win32", reason="Windows only test")
     def test_install_context_menu(self) -> None:

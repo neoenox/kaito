@@ -199,30 +199,31 @@ def test_delete_key_recursive_swallows_missing_and_os_errors(
     delete.assert_not_called()
 
 
-def test_get_exe_path_returns_dist_exe_in_development() -> None:
+def test_get_exe_path_returns_repo_dist_exe_in_development() -> None:
     fake_sys = SimpleNamespace(
         frozen=False, executable="C:/repo/.venv/Scripts/python.exe"
     )
     with (
         patch("kaito.context_menu.sys", fake_sys),
+        patch("kaito.context_menu.__file__", "C:/repo/src/kaito/context_menu.py"),
         patch("kaito.context_menu.Path.exists", return_value=True),
     ):
         result = _get_exe_path()
 
-    assert result == Path("C:/repo/.venv/dist/kaito.exe")
+    assert result == Path("C:/repo/dist/kaito.exe")
 
 
-def test_get_exe_path_falls_back_to_python_when_dist_missing() -> None:
+def test_get_exe_path_rejects_registration_when_dist_missing() -> None:
     fake_sys = SimpleNamespace(
         frozen=False, executable="C:/repo/.venv/Scripts/python.exe"
     )
     with (
         patch("kaito.context_menu.sys", fake_sys),
+        patch("kaito.context_menu.__file__", "C:/repo/src/kaito/context_menu.py"),
         patch("kaito.context_menu.Path.exists", return_value=False),
+        pytest.raises(FileNotFoundError, match="dist/kaito.exe"),
     ):
-        result = _get_exe_path()
-
-    assert result == Path("C:/repo/.venv/Scripts/python.exe")
+        _get_exe_path()
 
 
 def test_get_exe_path_uses_executable_when_frozen() -> None:

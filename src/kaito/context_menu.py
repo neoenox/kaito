@@ -12,10 +12,12 @@ _CONTEXT_EXTENSIONS = (".zip", ".rar", ".7z")
 def _get_exe_path() -> Path:
     if getattr(sys, "frozen", False):
         return Path(sys.executable)
-    development_exe = Path(sys.executable).parent.parent / "dist" / "kaito.exe"
+    development_exe = Path(__file__).parents[2] / "dist" / "kaito.exe"
     if development_exe.exists():
         return development_exe
-    return Path(sys.executable)
+    raise FileNotFoundError(
+        "dist/kaito.exe が見つかりません。コンテキストメニュー登録前に kaito.exe をビルドしてください。"
+    )
 
 
 def install_context_menu() -> None:
