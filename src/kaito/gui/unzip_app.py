@@ -40,6 +40,7 @@ from tkinterdnd2 import TkinterDnD
 from kaito.version import __version__
 
 from kaito.archive.service import ArchiveService
+from kaito.context_menu import _get_exe_path as _shared_get_exe_path
 from kaito.domain.errors import (
     ExtractionFailedError,
     InvalidPasswordError,
@@ -1457,14 +1458,8 @@ _CONTEXT_EXTENSIONS = [".zip", ".rar", ".7z"]
 
 
 def _get_exe_path() -> Path:
-    """kaito実行ファイルのパスを返す"""
-    if getattr(sys, "frozen", False):  # PyInstallerビルド
-        return Path(sys.executable)
-    # 開発環境: dist/kaito.exe を返す
-    dev_exe = Path(sys.executable).parent.parent / "dist" / "kaito.exe"
-    if dev_exe.exists():
-        return dev_exe
-    return Path(sys.executable)
+    """kaito実行ファイルのパスを返す。解決規則はcontext_menuへ集約する。"""
+    return _shared_get_exe_path()
 
 
 def install_context_menu() -> None:
