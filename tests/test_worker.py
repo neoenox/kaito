@@ -70,9 +70,7 @@ class TestExtractWorker:
         assert result.errors[0].archive_name == "bad.zip"
         assert (dest / "ok" / "file.txt").read_text() == "data"
 
-    def test_run_destination_creation_error_continues(
-        self, tmp_path: Path
-    ) -> None:
+    def test_run_destination_creation_error_continues(self, tmp_path: Path) -> None:
         """展開先を作れないアーカイブを記録し、後続アーカイブは続行する"""
         first = tmp_path / "first.zip"
         _make_zip(first, {"first.txt": "first"})
