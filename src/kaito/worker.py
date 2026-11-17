@@ -95,7 +95,6 @@ class ExtractWorker:
                 archive_dest = resolve_extract_dest(self.dest, archive_path, entries)
             except Exception:
                 archive_dest = self.dest / archive_path.stem
-            archive_dest.mkdir(parents=True, exist_ok=True)
 
             def on_progress(
                 current: int,
@@ -123,6 +122,10 @@ class ExtractWorker:
                     )
 
             try:
+                # Destination creation is part of this archive's operation. Keep
+                # filesystem failures in the per-archive result so the GUI always
+                # receives a completion result and later archives can continue.
+                archive_dest.mkdir(parents=True, exist_ok=True)
                 unzip.extract_archive(
                     archive_path,
                     archive_dest,
