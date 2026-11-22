@@ -70,6 +70,31 @@ class TestExtractWorker:
         assert result.errors[0].archive_name == "bad.zip"
         assert (dest / "ok" / "file.txt").read_text() == "data"
 
+    def test_run_destination_creation_error_continues(self, tmp_path: Path) -> None:
+        """展開先を作れないアーカイブを記録し、後続アーカイブは続行する"""
+        first = tmp_path / "first.zip"
+        _make_zip(first, {"first.txt": "first"})
+        second = tmp_path / "second.zip"
+        _make_zip(second, {"second.txt": "second"})
+
+        blocked_parent = tmp_path / "not-a-directory"
+        blocked_parent.write_text("file, not a directory")
+        dest = tmp_path / "out"
+
+        worker = ExtractWorker([first, second], dest)
+        with patch(
+            "kaito.worker.resolve_extract_dest",
+            side_effect=[blocked_parent / "first", dest / "second"],
+        ):
+            result = worker.run()
+
+        assert result.success_count == 1
+        assert result.error_count == 1
+        assert result.errors[0].archive_name == "first.zip"
+        assert "not-a-directory" in result.errors[0].message
+        assert (dest / "second" / "second.txt").read_text() == "second"
+        assert result.extracted_dests == [dest / "second"]
+
     def test_run_cancel_before_start(self, tmp_path: Path) -> None:
         """開始前にキャンセルされた場合は何も展開しない"""
         z = tmp_path / "a.zip"
